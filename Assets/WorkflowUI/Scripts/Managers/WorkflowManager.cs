@@ -7,8 +7,6 @@ namespace WorkflowUI.Scripts.Managers
 {
     public class WorkflowManager : MonoBehaviour
     {
-        private static WorkflowManager Instance { get; set; }
-
         [Header("Canvas Reference")] 
         public Canvas WorkflowCanvas;
         public GameObject WorkflowHolderPanel;
@@ -20,14 +18,6 @@ namespace WorkflowUI.Scripts.Managers
         [Header("Run Time")] 
         public Model.Workflow CurrentWorkflow;
         public List<LineBehaviour> LineBehaviours = new List<LineBehaviour>();
-
-        private void Awake()
-        {
-            if (Instance)
-                Destroy(this.gameObject);
-            else
-                Instance = this;
-        }
 
         [ContextMenu("New Workflow")]
         public void CreateNewWorkflow()
