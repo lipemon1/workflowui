@@ -43,7 +43,7 @@ namespace WorkflowUI.Scripts.Managers
 
         private void OnNewEventButtonClick()
         {
-            WorkflowManager.CreateNewEvent(GetMousePositionOnCanvas());
+            WorkflowManager.CreateNewEvent(WorkflowManager.Instance.GetMousePositionOnCanvas());
             OnAnyOptionClicked();
         }
 
@@ -55,7 +55,7 @@ namespace WorkflowUI.Scripts.Managers
 
         public void OpenOptionsMenu()
         {
-            OptionsPanelGO.transform.position = GetMousePositionOnCanvas();
+            OptionsPanelGO.transform.position = WorkflowManager.Instance.GetMousePositionOnCanvas();
             ToggleOptionsPanel(true);
         }
 
@@ -83,14 +83,6 @@ namespace WorkflowUI.Scripts.Managers
                 OptionsPanelGO.gameObject.SetActive(!OptionsPanelGO.gameObject.activeInHierarchy);
 
             OptionsPanelIsOpen = OptionsPanelGO.gameObject.activeInHierarchy;
-        }
-
-        private Vector3 GetMousePositionOnCanvas()
-        {
-            Vector3 screenPos = Input.mousePosition;
-            screenPos.z = CameraCanvas.planeDistance;
-            Camera renderCamera = CameraCanvas.worldCamera;
-            return renderCamera.ScreenToWorldPoint(screenPos);
         }
     }
 }

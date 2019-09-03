@@ -7,6 +7,8 @@ namespace WorkflowUI.Scripts.Managers
 {
     public class WorkflowManager : MonoBehaviour
     {
+        public static WorkflowManager Instance { get; set; }
+        
         [Header("Canvas Reference")] 
         public Canvas WorkflowCanvas;
         public GameObject WorkflowHolderPanel;
@@ -18,6 +20,14 @@ namespace WorkflowUI.Scripts.Managers
         [Header("Run Time")] 
         public Model.Workflow CurrentWorkflow;
         public List<LineBehaviour> LineBehaviours = new List<LineBehaviour>();
+
+        private void Awake()
+        {
+            if (Instance)
+                Destroy(this.gameObject);
+            else
+                Instance = this;
+        }
 
         [ContextMenu("New Workflow")]
         public void CreateNewWorkflow()
@@ -74,6 +84,16 @@ namespace WorkflowUI.Scripts.Managers
         public bool HasActiveWorkflow()
         {
             return !string.IsNullOrEmpty(CurrentWorkflow.Id);
+        }
+        
+        public Vector3 GetMousePositionOnCanvas()
+        {
+            var canvas = Instance.WorkflowCanvas;
+        
+            Vector3 screenPos = Input.mousePosition;
+            screenPos.z = canvas.planeDistance;
+            Camera renderCamera = canvas.worldCamera;
+            return renderCamera.ScreenToWorldPoint(screenPos);
         }
     }
 }

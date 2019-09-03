@@ -598,7 +598,7 @@ GameObject:
   - component: {fileID: 478115495}
   m_Layer: 5
   m_Name: Workflow Canvas
-  m_TagString: Untagged
+  m_TagString: WorkflowCanvas
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
