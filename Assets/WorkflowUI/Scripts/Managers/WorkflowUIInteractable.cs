@@ -5,6 +5,12 @@ namespace WorkflowUI.Scripts.Managers
 {
     public class WorkflowUIInteractable : MonoBehaviour
     {
+        [Header("Camera")]
+        public Canvas CameraCanvas;
+        
+        [Header("Workflow Id")] 
+        public Text WorkflowIdText;
+        
         [Header("Options Panel")] 
         public GameObject OptionsPanelGO;
         public Button NewWorkflowButton;
@@ -14,6 +20,9 @@ namespace WorkflowUI.Scripts.Managers
         [Header("Workflow Manager")] 
         public WorkflowManager WorkflowManager;
 
+        [Header("Run Time")] 
+        public bool OptionsPanelIsOpen;
+        
         private void Awake()
         {
             if (!WorkflowManager)
@@ -22,17 +31,19 @@ namespace WorkflowUI.Scripts.Managers
             NewWorkflowButton.onClick.AddListener(OnNewWorkflowButtonClick);
             NewEventButton.onClick.AddListener(OnNewEventButtonClick);
             UpdateLinesButton.onClick.AddListener(OnUpdateLinesButtonClick);
+            
+            ToggleOptionsPanel(false);
         }
 
         private void OnNewWorkflowButtonClick()
         {
-            WorkflowManager.CreateNewWorkflow();
+            WorkflowIdText.text = "Workflow: " + WorkflowManager.CreateNewWorkflow(true);
             ToggleOptionsPanel(false);
         }
 
         private void OnNewEventButtonClick()
         {
-            WorkflowManager.CreateNewEvent();
+            WorkflowManager.CreateNewEvent(GetMousePositionOnCanvas());
             OnAnyOptionClicked();
         }
 
@@ -42,10 +53,16 @@ namespace WorkflowUI.Scripts.Managers
             OnAnyOptionClicked();
         }
 
-        public void OpenOptionsMenu(Vector3 newPosition)
+        public void OpenOptionsMenu()
         {
-            OptionsPanelGO.transform.position = newPosition;
+            OptionsPanelGO.transform.position = GetMousePositionOnCanvas();
             ToggleOptionsPanel(true);
+        }
+
+        public void CloseOptionsMenu()
+        {
+            if(OptionsPanelGO)
+                ToggleOptionsPanel(false);
         }
 
         private void OnAnyOptionClicked()
@@ -55,10 +72,25 @@ namespace WorkflowUI.Scripts.Managers
 
         private void ToggleOptionsPanel(bool? openPanel)
         {
+            var workflowActive = WorkflowManager.HasActiveWorkflow();
+            
+            NewEventButton.interactable = workflowActive;
+            UpdateLinesButton.interactable = workflowActive;
+            
             if (openPanel != null)
                 OptionsPanelGO.gameObject.SetActive((bool) openPanel);
             else
                 OptionsPanelGO.gameObject.SetActive(!OptionsPanelGO.gameObject.activeInHierarchy);
+
+            OptionsPanelIsOpen = OptionsPanelGO.gameObject.activeInHierarchy;
+        }
+
+        private Vector3 GetMousePositionOnCanvas()
+        {
+            Vector3 screenPos = Input.mousePosition;
+            screenPos.z = CameraCanvas.planeDistance;
+            Camera renderCamera = CameraCanvas.worldCamera;
+            return renderCamera.ScreenToWorldPoint(screenPos);
         }
     }
 }

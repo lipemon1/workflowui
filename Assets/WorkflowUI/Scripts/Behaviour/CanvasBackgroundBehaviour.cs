@@ -6,7 +6,7 @@ namespace WorkflowUI.Scripts.Behaviour
 {
     public class CanvasBackgroundBehaviour : MonoBehaviour,IPointerClickHandler
     {
-        [Header("Workflow UI Interactable")] 
+        [Header("Configuration")] 
         public WorkflowUIInteractable WorkflowUiInteractable;
  
         public void OnPointerClick(PointerEventData eventData)
@@ -16,23 +16,19 @@ namespace WorkflowUI.Scripts.Behaviour
             else if (eventData.button == PointerEventData.InputButton.Middle)
                 OnMiddleClick();
             else if (eventData.button == PointerEventData.InputButton.Right)
-                OnRightClick(eventData);
+                OnRightClick();
         }
 
         private void OnLeftClick()
         {
             Debug.Log("Left click on Canvas Behaviour");
+            WorkflowUiInteractable.CloseOptionsMenu();
         }
 
-        private void OnRightClick(PointerEventData ped)
+        private void OnRightClick()
         {
             Debug.Log("Right click on Canvas Behaviour");
-            if (!RectTransformUtility.ScreenPointToLocalPointInRectangle(GetComponent<RectTransform>(), ped.position, ped.pressEventCamera, out Vector2 localCursor))
-                return;
- 
-            Debug.Log("LocalCursor:" + localCursor);
-            var finalVector = new Vector3(localCursor.x, localCursor.y, 0);
-            WorkflowUiInteractable.OpenOptionsMenu(finalVector);
+            WorkflowUiInteractable.OpenOptionsMenu();
         }
 
         private void OnMiddleClick()

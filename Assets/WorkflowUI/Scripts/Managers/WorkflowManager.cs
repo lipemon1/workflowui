@@ -25,10 +25,16 @@ namespace WorkflowUI.Scripts.Managers
             CurrentWorkflow = new Model.Workflow();
         }
 
-        [ContextMenu("New Event")]
-        public void CreateNewEvent()
+        public string CreateNewWorkflow(bool withString)
+        {
+            CreateNewWorkflow();
+            return CurrentWorkflow.Id;
+        }
+        
+        public void CreateNewEvent(Vector3 eventSpawnPosition)
         {
             var newEventBehaviour = Instantiate(EventBehaviourPrefab, WorkflowHolderPanel.transform);
+            newEventBehaviour.transform.position = eventSpawnPosition;
 
             var newEvent = new Event(newEventBehaviour);
             newEventBehaviour.Initiate(newEvent);
@@ -41,8 +47,7 @@ namespace WorkflowUI.Scripts.Managers
                 CreateNewLine(CurrentWorkflow.Events[CurrentWorkflow.Events.Count - 1], CurrentWorkflow.Events[CurrentWorkflow.Events.Count - 2]);
             }
         }
-
-        [ContextMenu("New Line")]
+        
         public void CreateNewLine(Event firstEvent, Event secondEvent)
         {
             var newLineBehaviour = Instantiate(LineBehaviourPrefab, WorkflowHolderPanel.transform);
@@ -64,6 +69,11 @@ namespace WorkflowUI.Scripts.Managers
         public void UpdateLines()
         {
             LineBehaviours.ForEach(lb => lb.UpdateLines());
+        }
+
+        public bool HasActiveWorkflow()
+        {
+            return !string.IsNullOrEmpty(CurrentWorkflow.Id);
         }
     }
 }
