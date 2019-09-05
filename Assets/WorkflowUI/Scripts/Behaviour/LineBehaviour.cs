@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
+using WorkflowUI.Scripts.Managers;
 
 namespace WorkflowUI.Scripts.Behaviour
 {
@@ -6,8 +8,9 @@ namespace WorkflowUI.Scripts.Behaviour
     {
         [Header("Inner Configuration")] 
         public LineRenderer LineRenderer;
-        
-        [Header("Run Time")]
+
+        [Header("Run Time")] 
+        public string LineId;
         public EventBehaviour StartEvent;
         public EventBehaviour EndEvent;
 
@@ -16,9 +19,11 @@ namespace WorkflowUI.Scripts.Behaviour
             UpdateLines();
         }
 
-        public void Initiate(EventBehaviour[] eventBehaviours)
+        public void Initiate(EventBehaviour[] eventBehaviours, string lineId)
         {
-            StartEvent = eventBehaviours[0];
+            LineId = lineId;
+            
+            StartEvent = eventBehaviours[0];    
             EndEvent = eventBehaviours[1];
             
             DrawLine();
@@ -26,13 +31,30 @@ namespace WorkflowUI.Scripts.Behaviour
 
         private void DrawLine()
         {
-            LineRenderer.SetPosition(0, StartEvent.transform.position);
-            LineRenderer.SetPosition(1, EndEvent.transform.position);
+            if (StartEvent == null || EndEvent == null)
+                Destroy(this.gameObject);
+            else
+            {
+                try
+                {
+                    LineRenderer.SetPosition(0, StartEvent.transform.position);
+                    LineRenderer.SetPosition(1, EndEvent.transform.position);
+                }
+                catch (Exception e)
+                {
+                    Debug.Log("Not possible to create the line renderer");
+                }
+            }
         }
 
         public void UpdateLines()
         {
             DrawLine();
+        }
+
+        private void OnDestroy()
+        {
+            WorkflowManager.Instance.DeleteLines();
         }
     }
 }

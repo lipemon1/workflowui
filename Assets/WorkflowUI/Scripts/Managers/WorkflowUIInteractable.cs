@@ -43,7 +43,7 @@ namespace WorkflowUI.Scripts.Managers
 
         private void OnNewEventButtonClick()
         {
-            WorkflowManager.CreateNewEvent(WorkflowManager.Instance.GetMousePositionOnCanvas());
+            WorkflowManager.CreateNewEvent();
             OnAnyOptionClicked();
         }
 
