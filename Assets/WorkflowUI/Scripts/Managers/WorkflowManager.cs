@@ -19,9 +19,16 @@ namespace WorkflowUI.Scripts.Managers
         public EventBehaviour EventBehaviourPrefab;
         public LineBehaviour LineBehaviourPrefab;
 
+        [Header("COlors")] 
+        public Color BaseColor;
+        public Color ProcessColor;
+        public Color NotificationColor;
+
         [Header("Run Time")] 
+        public bool IsConnecting;
         public Model.Workflow CurrentWorkflow;
         public List<LineBehaviour> LineBehaviours = new List<LineBehaviour>();
+        public Model.Event CurrentEventToConnect;
 
         private void Awake()
         {
@@ -30,6 +37,14 @@ namespace WorkflowUI.Scripts.Managers
             else
                 Instance = this;
         }
+
+        private void Update()
+        {
+            if(IsConnecting && Input.GetKeyDown(KeyCode.Escape))
+                CancelConnectionWithEvent();
+        }
+
+        #region WORKFLOW
 
         [ContextMenu("New Workflow")]
         public void CreateNewWorkflow()
@@ -43,6 +58,14 @@ namespace WorkflowUI.Scripts.Managers
             return CurrentWorkflow.Id;
         }
         
+        public bool HasActiveWorkflow()
+        {
+            return !string.IsNullOrEmpty(CurrentWorkflow.Id);
+        }
+
+        #endregion
+
+        #region EVENT
         public void CreateNewEvent(Event currentEvent = null)
         {
             var newEventBehaviour = Instantiate(EventBehaviourPrefab, WorkflowHolderPanel.transform);
@@ -67,10 +90,60 @@ namespace WorkflowUI.Scripts.Managers
             Destroy(eventToDelete.EventBehaviour.gameObject);
             
             CurrentWorkflow.Events.Remove(CurrentWorkflow.Events.FirstOrDefault(e => e.Id == id));
+
+            foreach (var @event in CurrentWorkflow.Events.Where(e => e.ConnectedEventIds.Contains(id)))
+                @event.ConnectedEventIds.Remove(id);
             
             UpdateLines();
         }
+
+        public Color GetColorType(Event.EventType eventType)
+        {
+            switch (eventType)
+            {
+                case Event.EventType.Undefined:
+                    return BaseColor;
+                case Event.EventType.Process:
+                    return ProcessColor;
+                case Event.EventType.Notification:
+                    return NotificationColor;
+                default:
+                    return BaseColor;
+            }
+        }
+
+        #region Event Connection
+
+        public void StartToConnectWithOtherEvent(Event baseEventToConnect)
+        {
+            SetIsConnecting(true);
+            CurrentEventToConnect = baseEventToConnect;
+        }
+
+        public void ConnectWithEvent(Event eventToConnect)
+        {
+            CurrentEventToConnect.ConnectWithEvent(eventToConnect.Id);
+            SetIsConnecting(false);
+        }
+
+        private void CancelConnectionWithEvent()
+        {
+            CurrentEventToConnect = null;
+            SetIsConnecting(false);
+        }
+
+        private void SetIsConnecting(bool value)
+        {
+            IsConnecting = value;
+            
+            CurrentWorkflow.Events.ForEach(e => e.EventBehaviour.ChangeStatus(value ? EventBehaviour.EventBehaviourStatus.Connecting : EventBehaviour.EventBehaviourStatus.Idle));
+        }
+
+        #endregion
         
+        #endregion
+
+        #region Lines
         public void CreateNewLine(Event firstEvent, Event secondEvent)
         {
             var newLineBehaviour = Instantiate(LineBehaviourPrefab, WorkflowHolderPanel.transform);
@@ -88,6 +161,15 @@ namespace WorkflowUI.Scripts.Managers
             LineBehaviours.Add(newLineBehaviour);
         }
 
+        public void CreateEventLines(string baseEventId, string newEventIdToConnectWith)
+        {
+            var firstEvent = CurrentWorkflow.Events.FirstOrDefault(e => e.Id == baseEventId);
+            var secondEvent = CurrentWorkflow.Events.FirstOrDefault(e => e.Id == newEventIdToConnectWith);
+            
+            if(firstEvent != null && secondEvent != null)
+                CreateNewLine(firstEvent, secondEvent);
+        }
+
         [ContextMenu("Delete Lines")]
         public void DeleteLines()
         {
@@ -99,11 +181,8 @@ namespace WorkflowUI.Scripts.Managers
         {
             LineBehaviours.ForEach(lb => lb.UpdateLines());
         }
-
-        public bool HasActiveWorkflow()
-        {
-            return !string.IsNullOrEmpty(CurrentWorkflow.Id);
-        }
+        
+        #endregion
         
         public Vector3 GetMousePositionOnCanvas()
         {

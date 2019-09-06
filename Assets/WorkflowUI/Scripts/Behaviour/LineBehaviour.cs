@@ -42,7 +42,7 @@ namespace WorkflowUI.Scripts.Behaviour
                 }
                 catch (Exception e)
                 {
-                    Debug.Log("Not possible to create the line renderer");
+                    Debug.Log("Not possible to create the line renderer with message: " + e.Message);
                 }
             }
         }
